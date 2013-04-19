@@ -1,0 +1,2 @@
+path=C:\rd code\project-sentinel\perpetual_analytic_engine
+exclude=util,tests,MyExperiments,TestCalls,Debug,Unwanted,Amazon,Local

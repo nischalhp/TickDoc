@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import request
 from flask import render_template
+import ListOfProcs
 
 app = Flask(__name__)
 
@@ -14,9 +15,12 @@ def shutdown_server():
 
 
 @app.route('/')
-def hello_world():
-	#return "hello"
-    return render_template('BootStrap101.html')
+def initial_load():
+    return render_template('index.html')
+
+@app.route('/index.html')
+def documentation():
+  	return render_template('index.html')
 
 @app.route('/new.html')
 def add_new():
@@ -27,7 +31,9 @@ def shutdown():
 	shutdown_server()
 	return 'Server shutting down...'
 
-
-
+@app.route('/getFileNames')
+def getFileNames():
+  return ListOfProcs.main('config.txt')
+  
 if __name__ == '__main__':
     app.run()
