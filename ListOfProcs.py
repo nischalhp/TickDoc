@@ -1,10 +1,14 @@
+'''
+Created on Aug 21, 2012
+
+@author: I069205
+
+'''
 import re
 import os
 import sys
-import pymongo
-
-
-def updateMongo()
+import Procedure
+import json
 
 def print_details(name, listy):
     if len(listy)==0:
@@ -91,6 +95,30 @@ def getStuff(infile, typey): #type=1 for proc, type=2 for tables, type=3 for tab
         else:
             return procedure_defs
 
+def get_files_in_path(path, exclude):
+    slash_char = ""
+    file_list = []
+    for r,d,f in os.walk(path):
+        if(r.rfind("/")==-1):
+            slash_char = "\\"
+            indy = r.rfind("\\")
+        else:
+            slash_char = "/"
+            indy = r.rfind("/")
+        splitter = r.split(slash_char)
+        cont = 0
+        for direct in splitter:
+            if(direct in exclude):
+                cont = 1
+		break
+        if(cont==1):
+            continue
+        for files in f:
+            if files.endswith(".sql"):
+                file_list.append(os.path.join(r,files))
+    return file_list
+
+
 def main(config_path):
     listy = []
     defs = []
@@ -99,6 +127,8 @@ def main(config_path):
     exclude = []
     slash_char = ""
     types = []
+    proc_path = []
+    list_proc_objs = []
 
     config_file = open(config_path, "r")
     for line in config_file.readlines():
@@ -112,31 +142,29 @@ def main(config_path):
 	        exclude.append(entry)
     config_file.close()
     
-    for r,d,f in os.walk(path):
-        if(r.rfind("/")==-1):
-            slash_char = "\\"
-            indy = r.rfind("\\")
-        else:
-            slash_char = "/"
-            indy = r.rfind("/")
-        splitter = r.split(slash_char)
-        cont = 0
-        for direct in splitter:
-            if(direct in exclude):
-                   cont = 1
-        if(cont==1):
-            continue
-        for files in f:
-            if files.endswith(".sql"):
-                file_list.append(os.path.join(r,files))
+    file_list = get_files_in_path(path, exclude)
     for infile in file_list:
         defs.append(getStuff(infile, 5))
-    return_string = "{\"data\":["
-    for proc in defs:
+        proc_path.append(infile)
+    #return_string = "{\"data\":["
+    for i in range(0, len(defs)):
+        curr_path = proc_path[i]
+        proc = defs[i]
         if len(proc) > 0:
-    	    for entry in proc:
-    	        return_string += "\"" + entry + "\","
-    return_string = return_string.rstrip(",") + "]}"
-    return return_string
+            for entry in proc:
+                new_proc = Procedure.Procedure(curr_path, entry)
+                list_proc_objs.append(new_proc)
+    return list_proc_objs 
+    # for proc in defs:
+    #     if len(proc) > 0:
+    # 	    for entry in proc:
+    # 	        return_string += "\"" + entry + "\","
+    # return_string = return_string.rstrip(",")  + "]}"
+    # print return_string
 
-main('config.txt')
+#print main('config.txt')
+
+def getDependency(inFile,typey):
+    dependency_output= [] 
+    dependency_output.append(getStuff(inFile,typey))
+    return dependency_output
